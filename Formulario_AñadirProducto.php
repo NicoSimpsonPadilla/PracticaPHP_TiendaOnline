@@ -11,26 +11,26 @@
 <body>
     <?php
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $temp_nombre = depurar($_POST["nombre"]);
-        $temp_nombre = preg_replace("/[ ]{2,}/", ' ', $temp_nombre);
+        $temp_nombreProducto = depurar($_POST["nombre"]);
+        $temp_nombreProducto = preg_replace("/[ ]{2,}/", ' ', $temp_nombreProducto);
         $temp_precio = depurar($_POST["precio"]);
         $temp_descripcion = depurar($_POST["descripcion"]);
         $temp_descripcion = preg_replace("/[ ]{2,}/", ' ', $temp_descripcion);
         $temp_cantidad = depurar($_POST["cantidad"]);
 
         // Validacion del nombre
-        if(!strlen($temp_nombre) > 0) {
-            $err_nombre = "El producto debe de tener nombre.";
+        if(!strlen($temp_nombreProducto) > 0) {
+            $err_nombreProducto = "El producto debe de tener nombre.";
         } else {
-            if (strlen($temp_nombre) > 40) {
-                $err_nombre = "El nombre no puede ser tan largo";
+            if (strlen($temp_nombreProducto) > 40) {
+                $err_nombreProducto = "El nombre no puede ser tan largo";
             } else {
-                // /^[a-zA-Z0-9]{4,8}$/
+                // /^[a-zA-Z0-9 ]{1,40}$/
                 $patron = "/^[a-zA-Z0-9 ]{1,40}$/";
-                if(!preg_match($patron, $temp_nombre)) {
+                if(!preg_match($patron, $temp_nombreProducto)) {
 
                 } else {
-                    $nombre = ucwords(strtolower($temp_nombre));
+                    $nombreProducto = ucwords(strtolower($temp_nombreProducto));
                 }
             }
         }
@@ -54,7 +54,7 @@
                     <div class="mb-3">
                         <label class="form-label">Nombre del producto: </label>
                         <input class="form-control" type="text" name="nombre">
-                        <?php if(isset($err_nombre)) echo $err_nombre ?>
+                        <?php if(isset($err_nombreProducto)) echo $err_nombreProducto ?>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Precio del producto: </label>
