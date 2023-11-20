@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario_IniciarSesion_Usuario</title>
-    <link rel="stylesheet" href="CSS/bootstrap.min.css">
-    <link rel="stylesheet" href="CSS/estilos.css">
-    <?php require 'Utilidades/depurar.php'; ?>
-    <?php require 'Utilidades/base_de_datos.php'; ?>
+    <link rel="stylesheet" href="views/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="views/styles/estilos.css">
+    <?php require 'util/depurar.php'; ?>
+    <?php require 'util/base_de_datos.php'; ?>
 </head>
 <body>
     <?php
@@ -27,6 +27,7 @@
         } else {
             while ($fila = $resultado -> fetch_assoc()) {
                 $contrasena_cifrada= $fila["contrasena"];
+                $rol = $fila["rol"];
             }
     
             $acceso_valido = password_verify($contrasena, $contrasena_cifrada);
@@ -39,6 +40,7 @@
                 <?php
                 session_start();
                 $_SESSION["usuario"] = $usuario;
+                $_SESSION["rol"] = $rol;
                 header('location: Principal.php');
             } else {
                 ?>
@@ -52,7 +54,7 @@
     ?>
     <div class="añadirProducto container">
         <div class="añadirProducto_content container">
-            <h1>Formulario Inicio de sesion Usuario</h1>
+            <h1>Iniciar Sesión</h1>
             <div class="col-9">
                 <form action="" method="post">
                     <div class="mb-3">
@@ -63,7 +65,8 @@
                         <label class="form-label">Contraseña: </label>
                         <input class="form-control" type="password" name="contrasena">
                     </div>
-                    <button class="btn btn-dark" type="submit">Enviar</button>
+                    <button class="btn btn-dark" type="submit">Iniciar</button>
+                    <a class="btn btn-dark" href="Principal.php">Volver</a>
                 </form>
             </div>
         </div>

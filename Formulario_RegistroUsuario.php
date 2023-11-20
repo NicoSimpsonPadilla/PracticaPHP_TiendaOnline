@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario_Registro_Usuario</title>
-    <link rel="stylesheet" href="CSS/bootstrap.min.css">
-    <link rel="stylesheet" href="CSS/estilos.css">
-    <?php require 'Utilidades/depurar.php'; ?>
-    <?php require 'Utilidades/base_de_datos.php'; ?>
+    <link rel="stylesheet" href="views/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="views/styles/estilos.css">
+    <?php require 'util/depurar.php'; ?>
+    <?php require 'util/base_de_datos.php'; ?>
 </head>
 <body>
 <?php
@@ -74,7 +74,7 @@
 
     <div class="añadirProducto container">
         <div class="añadirProducto_content container">
-            <h1>Formulario Registro Usuario</h1>
+            <h1>Registro</h1>
             <div class="col-9">
                 <form action="" method="post">
                     <div class="mb-3">
@@ -92,7 +92,8 @@
                         <input class="form-control" type="date" name="fechaNacimiento">
                         <?php if(isset($err_fechaNacimiento)) echo $err_fechaNacimiento ?>
                     </div>
-                    <button class="btn btn-dark" type="submit">Enviar</button>
+                    <button class="btn btn-dark" type="submit">Registrar</button>
+                    <a class="btn btn-dark" href="Principal.php">Volver</a>
                 </form>
             </div>
         </div>
@@ -110,6 +111,8 @@
         $sql = "INSERT INTO Cestas (usuario, precioTotal) 
         VALUES ('$usuario', '0')";
         $conexion -> query($sql);
+
+        header('location: Principal.php');
     }
     ?>
 </body>

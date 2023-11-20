@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario_Añadir_Producto</title>
-    <link rel="stylesheet" href="CSS/bootstrap.min.css">
-    <link rel="stylesheet" href="CSS/estilos.css">
-    <?php require 'Utilidades/depurar.php'; ?>
-    <?php require 'Utilidades/base_de_datos.php'; ?>
+    <link rel="stylesheet" href="views/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="views/styles/estilos.css">
+    <?php require 'util/depurar.php'; ?>
+    <?php require 'util/base_de_datos.php'; ?>
 </head>
 <body>
     <?php
+
+    session_start();
+    if($_SESSION["rol"] != "admin") {
+        header('location: Principal.php');
+    }
+
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $temp_nombreProducto = depurar($_POST["nombre"]);
         $temp_nombreProducto = preg_replace("/[ ]{2,}/", ' ', $temp_nombreProducto);
@@ -24,7 +30,7 @@
         $tipo_imagen = $_FILES["imagen"]["type"];
         $tamano_imagen = $_FILES["imagen"]["size"];
         $ruta_temporal = $_FILES["imagen"]["tmp_name"];
-        $ruta_final = "imagenes/" . $nombre_imagen;
+        $ruta_final = "views/images/" . $nombre_imagen;
         move_uploaded_file($ruta_temporal, $ruta_final);
 
         // Validacion del nombre
@@ -95,7 +101,7 @@
 
     <div class="añadirProducto container">
         <div class="añadirProducto_content container">
-            <h1>Formulario Añadir Producto</h1>
+            <h1>Añadir Producto</h1>
             <div class="col-9">
                 <form action="" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
@@ -123,7 +129,8 @@
                     <input class="form-control" type="file" name="imagen">
                         <?php if(isset($err_imagen)) echo $err_imagen ?>
                     </div>
-                    <button class="btn btn-dark" type="submit">Enviar</button>
+                    <button class="btn btn-dark" type="submit">Crear</button>
+                    <a class="btn btn-dark" href="Principal.php">Volver</a>
                 </form>
             </div>
         </div>

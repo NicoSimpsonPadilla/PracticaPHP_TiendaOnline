@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagina_Principal</title>
-    <link rel="stylesheet" href="CSS/estilos.css">
-    <link rel="stylesheet" href="CSS/bootstrap.min.css">
-    <?php require "Utilidades/base_de_datos.php"; ?>
-    <?php require "Utilidades/producto.php"; ?>
+    <link rel="stylesheet" href="views/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="views/styles/estilos.css">
+    <?php require "util/base_de_datos.php"; ?>
+    <?php require "util/producto.php"; ?>
+    <?php require "util/depurar.php"; ?>
 </head>
 <body>
     <?php
-    //Usuario online
+    // Usuario online
     session_start();
     if(isset($_SESSION["usuario"])) {
         $usuario = $_SESSION["usuario"];
@@ -20,7 +21,64 @@
         $usuario = $_SESSION["usuario"];
     }
 
-    //Invocacion de los productos
+    // Añadir a cesta
+    if($_SERVER["REQUEST_METHOD"] == "POST") {
+
+        $id_producto = depurar($_POST["id_producto"]);
+        $id_cesta = -1;
+        $temp_cantidad = depurar($_POST["cantidad"]);
+
+        // Defino la id_cesta
+        $sql = "SELECT * FROM Cestas WHERE usuario = '$usuario'";
+        $resultado = $conexion->query($sql);
+        while ($fila = $resultado -> fetch_assoc()) {
+            $id_cesta = $fila["idCesta"];
+        }
+
+        // Validacion cantidad
+        if ($temp_cantidad < 1) {
+            $err_cantidad = "La cantidad debe de ser mayor a 1";
+        } else {
+            if ($temp_cantidad > 5) {
+                $err_cantidad = "La cantidad debe de ser menor a 5";
+            } else {
+                $cantidad = $temp_cantidad;
+            }
+        }
+
+        // Comprobar que se pueda añadir productos
+        $sql = "SELECT * FROM ProductosCestas WHERE idProducto = '$id_producto' && idCesta = '$id_cesta'";
+        $resultado = $conexion->query($sql);
+
+        while ($fila = $resultado -> fetch_assoc()) {
+            $max_cantidad = $fila["cantidad"];
+        }
+
+        // Si esta lleno
+        if ($max_cantidad + $cantidad > 10) {
+            $err_cantidad = "No se puede añadir mas de este producto";
+
+        // Si no esta lleno
+        } else {
+
+            // Envio a base de datos
+            if(isset($id_producto) && $id_cesta != -1 && isset($cantidad)) {
+                if ($max_cantidad == NULL) {
+                    $sql = "INSERT INTO ProductosCestas (idProducto, idCesta, cantidad) 
+                    VALUES ('$id_producto', '$id_cesta', '$cantidad')";
+                    $conexion -> query($sql);
+                } else {
+                    $cantidad_total = $max_cantidad + $cantidad;
+                    $sql = "UPDATE ProductosCestas 
+                    SET cantidad = '$cantidad_total' 
+                    WHERE (idProducto = '$id_producto' && idCesta = '$id_cesta')";
+                    $conexion -> query($sql);
+                }
+            } 
+        }
+    }
+
+    // Invocacion de los productos
     $sql = "SELECT * FROM productos";
     $resultado = $conexion->query($sql);
     $productos = [];
@@ -37,36 +95,88 @@
         array_push($productos, $nuevo_producto);
     }
     ?>
+
     <div class="alert alert-primary align-items-center" role="alert">
         <h1>Pagina principal</h1>
         <h2>Bienvenid@ <?php echo $usuario ?></h2>
-        <a href="Utilidades/cerrar_sesion.php" class="btn btn-outline-primary">Cerrar sesión</a>
-    </div>
+        <?php
+        if ($usuario == "invitado") {
+            ?>
+            <a href="Formulario_IniciarSesionUsuario.php" class="btn btn-outline-primary">Iniciar sesión</a>
+            <a href="Formulario_RegistroUsuario.php" class="btn btn-outline-primary">Registrarse</a>
+            <?php
+        } else {
+            ?>
+            <a href="util/cerrar_sesion.php" class="btn btn-outline-primary">Cerrar sesión</a>
+            <a href="Cesta.php" class="btn btn-outline-primary">Cesta</a>
+            <?php
+            if ($_SESSION["rol"] == "admin") {
+                ?>
+                <a href="Formulario_AñadirProducto.php" class="btn btn-outline-primary">Añadir producto</a>
+                <?php
+            }
+        }
+        echo "<br><br>";
+        if(isset($err_cantidad)){
+            ?><div class='alert alert-danger' role='alert'>
+            <?php echo "$err_cantidad"; ?></div>
+        <?php
+        }
+        ?>
+    </div> 
     
     <div class="container">
         <h1>Inicio</h1>
-        <table class="table table-secondary table-hover">
+        <table class="table table-secondary table-hover text-center">
             <thead class="table table-dark">
                 <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Descripcion</th>
-                    <th>Cantidad</th>
-                    <th>Imagen</th>
+                    <th class="col-md-1">ID</th>
+                    <th class="col-md-1">Nombre</th>
+                    <th class="col-md-1">Precio</th>
+                    <th class="col-md-2">Descripcion</th>
+                    <th class="col-md-1">Cantidad</th>
+                    <th class="col-md-6">Imagen</th>
+                    <?php
+                    if ($usuario != "invitado") {
+                    ?>
+                    <th>Cesta</th>
+                        <?php
+                        }
+                        ?>
                 </tr>
             </thead>
             <tbody>
                 <?php
-                foreach($productos as $producto) {
-                    echo "<tr>";
-                    echo "<td>" . $producto -> idProducto . "</td>";
-                    echo "<td>" . $producto -> nombreProducto . "</td>";
-                    echo "<td>" . $producto -> precio . "</td>";
-                    echo "<td>" . $producto -> descripcion . "</td>";
-                    echo "<td>" . $producto -> cantidad . "</td>";
-                    echo "<td> <img src=' ". $producto -> imagen ." ' width='100%' height='50%'/></td>";
-                    echo "</tr>";
+                foreach($productos as $producto) { ?>
+                    <tr>
+                        <td><?php echo $producto -> idProducto ?></td>
+                        <td><?php echo $producto -> nombreProducto ?></td>
+                        <td><?php echo $producto -> precio ?></td>
+                        <td><?php echo $producto -> descripcion ?></td>
+                        <td><?php echo $producto -> cantidad ?></td>
+                        <td><?php echo "<img class='rounded' src=' " . $producto -> imagen . " ' width='50%' height='25%'/>" ?></td>
+                        <?php
+                        if ($usuario != "invitado") {
+                        ?>
+                        <td>
+                            <form action="" method="post">
+                                <select class="form-select" name="cantidad">
+                                    <option selected value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                                <input type="hidden" name="id_producto"
+                                value="<?php echo $producto -> idProducto ?>">
+                                <input class="btn btn-dark" type="submit" value="Añadir">
+                            </form>
+                        </td>
+                        <?php
+                        }
+                        ?>
+                    </tr>
+                <?php
                 }
                 ?>
             </tbody>
