@@ -25,6 +25,7 @@
     if($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $id_producto = depurar($_POST["id_producto"]);
+        $precio = depurar($_POST["precio"]);
         $id_cesta = -1;
         $temp_cantidad = depurar($_POST["cantidad"]);
 
@@ -75,6 +76,9 @@
                     $conexion -> query($sql);
                 }
             } 
+            $precioCantidad = $cantidad * $precio;
+            $sqlPrecioTotal = "UPDATE Cestas SET precioTotal = precioTotal + $precioCantidad WHERE idCesta = $id_cesta";
+            $conexion-> query($sqlPrecioTotal);
         }
     }
 
@@ -169,6 +173,8 @@
                                 </select>
                                 <input type="hidden" name="id_producto"
                                 value="<?php echo $producto -> idProducto ?>">
+                                <input type="hidden" name="precio"
+                                value="<?php echo $producto -> precio ?>">
                                 <input class="btn btn-dark" type="submit" value="Añadir">
                             </form>
                         </td>
